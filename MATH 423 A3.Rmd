@@ -1,0 +1,125 @@
+---
+title: "MATH 423 A3"
+author: "Alyzeh Jiwani"
+date: "07/12/2019"
+output: pdf_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+library(tidyverse)
+abalone<-read.csv("http://www.math.mcgill.ca/yyang/regression/data/abalone.csv")
+```
+
+## Question 1
+The number of rings is indicative of the age of the abalone. The research group believes that there is a linear relationship between the height of the abaolones and their age.
+The linear model is:
+
+Age = beta_0 + beta_1*Height + epsilon
+
+where beta_0 is the intercept of the linear regression line, beta _1 is the coefficient of the slope of the regression line, and epsilon is iid Normal ( mean = 0, variance = sigma^2)
+we can estimate the model as follows:
+
+```{r, Question 1}
+names(abalone)
+summarise_all(abalone, mean)
+summarise_all(abalone, sd)
+range_height <- max(abalone$Height)-min(abalone$Height)
+range_age <- max(abalone$Rings)-min(abalone$Rings)
+Ranges <- c(range_height, range_age)
+Ranges
+m<-lm(Rings~Height, data=abalone)
+
+summary(m)
+
+ggplot(abalone, aes(x=Height, y= Rings))+
+  geom_point(col="cornflowerblue")
+
+```
+The plot seems to indicate that there is a correlation between Rings and Height
+As we can see, the estimate of the intercept of the regression line is
+
+beta_hat_0 = 3.9385
+The estimate of the slope coefficient is beta_hat_1 = 42.9714
+
+The estimated regression model is Age_hat = 3.9385 + 42.9714*Height
+As the slope coefficient is greater than zero, this implies that a larger ehight is associauted with an older age.
+the value of the slope coefficient suggests that for a one unit increase in the height of an abalone, the age increases by 42.9714
+We test the following hypotheses to see if the linear relationship is significant and if the value of the slope coefficient is positive.
+H_0 : beta_1 = 0, i.e. the height is not a predictor of the age of the abalone
+H_a : beta_1 > 0, i.e. a larger height is associated with an older age
+alpha = 0.05
+
+
+## Question 2
+Given that Y_i = Beta_1 x_1,1 + Beta_2x_2,1 + epsilon_i
+The least square estimate of Beta_hat_1 and Beta_hat_2 from the multiple regression will be the same as the sample seperate regression on x_1 and x_2
+y_ix_1,i + epsilon_i; i=1,2,...n
+thus:
+Beta_hat_1 = (x_1, x_1)^-1 x,y where y' = (y_1, ..., y_n) and x_1' = (x_1,1,..., x_1,n)
+we have y_i = Beta_2x_2,i + epsilon_i
+thus, the least squares est. of beta_hat_2 is
+beta_hat_2 = (y_2'x_2)'x_2y , x_2' = (x_2,1,..., x_2,n)
+Multiple regression model:
+y_i = beta_1x_1,i +beta_2x_2,i _ epsilon_i
+sum(x_1,ix_2,i)=0 1<=i<=n
+(y_1, y_2, y_3)^T = (x_1, x_2)(Beta_1, Beta_2)^T + (epsilon_1, epsilon_2, epsilon_3)^T
+y x*Beta + epsilon
+where:
+y' = (y_1, ... , y_n)
+x = (x_1, x_2)
+Beta' = (beta_1, beta_2)
+Thus we have:
+beta_hat = (x'x)^(-1)x'y = ((x_1', x_2)^T * (x_1, x_2)) * matrix((x_1', x_2', y, y, ncol = 2))
+        = matrix(x_1'x_1, x_2'x_1, x_1'x_2, x_2'x_2, ncol=2)^(-1) * matrix((x_1', x_2', y, y, ncol = 2))
+        = matrix(x_1'x_1, 0, 0, x_2'x_2, ncol=2)* matrix((x_1', x_2', y, y, ncol = 2)
+        = (beta_hat_1, beta_hat_2)^T = beta_hat
+        = matrix(x_1'x_1, x_2'x_2, x_1'y, x_2'y, ncol=2)
+     We can see that the values are the same as in the seperated model.
+
+## Question 3
+```{r}
+
+stackloss<-read.csv("stackloss.csv")
+stackloss
+
+```
+
+
+
+
+```{r}
+
+colnames(stackloss)
+par(mfrow=c(2,2))
+ggplot(stackloss, aes(x=Air.Flow, y= stack.loss))+
+  geom_point(col="cornflowerblue")
+ggplot(stackloss, aes(x=Water.Temp, y= stack.loss))+
+  geom_point(col="cornflowerblue")
+ggplot(stackloss, aes(x=Acid.Conc., y= stack.loss))+
+  geom_point(col="cornflowerblue")
+
+
+
+
+```
+
+
+```{r}
+reg_model <- lm(stack.loss~., data=stackloss)
+summary(reg_model)
+
+```
+this explains 91% of the variation in the data by the independent variables. Both Airflow and Water temp are significant in explaining the variation in the data. We can see taht acid conc. is not too significant as its p-value is greater than 0.05.
+
+```{r}
+confint(reg_model, level=0.9)
+
+```
+
+```{r}
+predict( reg_model, data = data.frame(Air.Flow = 58, Water.Temp = 20, Acid.Conc. = 86), interval = "prediction", level = 0.99)
+
+```
+
+
